@@ -1,0 +1,44 @@
+#!/bin/bash
+echo 'Setting env variables Started' >> /home/derana/tamil-client/deploy.log
+PREFIX="/derana/adaderana/client/" 
+
+export AWS_DEFAULT_REGION=us-east-1
+
+#NEXT_PUBLIC_BASE_URL=$(aws ssm get-parameter --name "${PREFIX}NEXT_PUBLIC_BASE_URL" --query Parameter.Value --output text)
+#export NEXT_PUBLIC_BASE_URL
+
+FACEBOOK_APP_ID=$(aws ssm get-parameter --name "${PREFIX}FACEBOOK_APP_ID" --query Parameter.Value --output text)
+export FACEBOOK_APP_ID
+
+FACEBOOK_APP_SECERT=$(aws ssm get-parameter --name "${PREFIX}FACEBOOK_APP_SECERT" --query Parameter.Value --output text)
+export FACEBOOK_APP_SECERT
+
+GOOGLE_CLIENT_ID=$(aws ssm get-parameter --name "${PREFIX}GOOGLE_CLIENT_ID" --query Parameter.Value --output text)
+export GOOGLE_CLIENT_ID
+
+GOOGLE_CLIENT_ID_SECRET=$(aws ssm get-parameter --name "${PREFIX}GOOGLE_CLIENT_SECRET" --query Parameter.Value --output text)
+export GOOGLE_CLIENT_SECRET
+
+PORT=$(aws ssm get-parameter --name "${PREFIX}PORT" --query Parameter.Value --output text)
+export PORT
+
+
+
+#NEXT_PUBLIC_ACCESS_KEY=$(aws ssm get-parameter --name "${PREFIX}NEXT_PUBLIC_ACCESS_KEY" --with-decryption --query Parameter.Value --output text)
+#export NEXT_PUBLIC_ACCESS_KEY
+
+#NEXT_PUBLIC_ACCESS_KEY_ID=$(aws ssm get-parameter --name "${PREFIX}NEXT_PUBLIC_ACCESS_KEY_ID" --with-decryption --query Parameter.Value --output text)
+#export NEXT_PUBLIC_ACCESS_KEY_ID
+
+#NEXT_PUBLIC_MEASUREMENT_ID=$(aws ssm get-parameter --name "${PREFIX}NEXT_PUBLIC_MEASUREMENT_ID" --with-decryption --query Parameter.Value --output text)
+#export NEXT_PUBLIC_MEASUREMENT_ID
+
+echo 'Starting App ' >> /home/derana/tamil-client/deploy.log
+
+echo 'cd to home folder' >> /home/derana/tamil-client/deploy.log
+cd /home/derana/tamil-client/
+
+echo 'pm2 start' >> /home/derana/tamil-client/deploy.log
+pm2 start /home/derana/tamil-client/ecosystem.config.js --time >> /home/derana/tamil-client/deploy.log
+
+echo 'Application start complete'  >> /home/derana/tamil-client/deploy.log

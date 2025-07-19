@@ -1,0 +1,333 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prismaStringschema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PublicUser {
+  id         String   @id @default(uuid())
+  firstName  String
+  lastName   String
+  email      String   @unique
+  password   String?
+  facebookId String?
+  googleId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model User {
+  id          String   @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String   @unique
+  password    String
+  role        Role?
+  admin       Admin?
+  createdBy   Admin?   @relation(name: "CreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Admin {
+  id           String     @id @default(uuid())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  level        AdminLevel
+  userId       String     @unique
+  createdUsers User[]     @relation(name: "CreatedBy")
+}
+
+enum AdminLevel {
+  SuperAdmin
+  Admin
+  RoleAdmin
+}
+
+enum Role {
+  Editor
+  AdsManager
+  Analyst
+}
+
+model NewsArticle {
+  id                    String               @id @unique @default(cuid())
+  author                String
+  title                 String
+  content               String
+  summary               String
+  mediaURL              String?
+  audioURL              String?
+  videoURL              String?
+  documentURL           String?
+  additionalImageURLs   String?
+  category              NewsCategory         @relation(fields: [categoryId], references: [id])
+  categoryId            String
+  tags                  Json?
+  publishedAt           DateTime?
+  scheduledAt           DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  hotNews               Boolean              @default(false)
+  leadNews              Boolean              @default(false)
+  breakingNews          Boolean              @default(false)
+  updateNews            Boolean              @default(false)
+  videoNews             Boolean              @default(false)
+  photoNews             Boolean              @default(false)
+  status                NewsArticleStatus?
+  thread                Thread?              @relation(fields: [threadId], references: [id])
+  threadId              String?
+  comments              NewsArticleComment[]
+  relatedNewsArticleIds Json?
+  topPicture            Boolean              @default(false)
+  newsEditor            String?
+  editors               Editors?             @relation(fields: [newsEditor], references: [id])
+  viewCount             Int?                 @default(0)
+  commentSection        Boolean?
+  pinNewsArticle        PinNewsArticle?
+}
+
+enum NewsArticleStatus {
+  Draft
+  Publish
+  OnlyMe
+  Schedule
+  Trash
+}
+
+model NewsArticleComment {
+  id                   String               @id @default(uuid())
+  newsArticle          NewsArticle          @relation(fields: [newsArticleId], references: [id])
+  newsArticleId        String
+  userDisplayName      String
+  userId               String
+  body                 String
+  approved             Boolean              @default(false)
+  createdAt            DateTime             @default(now())
+  replies              NewsArticleComment[] @relation(name: "CommentReplies")
+  newsArticleComment   NewsArticleComment?  @relation(name: "CommentReplies", fields: [newsArticleCommentId], references: [id])
+  newsArticleCommentId String?
+}
+
+model NewsCategory {
+  id              String         @id @unique @default(uuid())
+  categoryName    String         @unique
+  home            Boolean        @default(false)
+  navBar          Boolean        @default(false)
+  articles        NewsArticle[]
+  subCategories   NewsCategory[] @relation(name: "SubCatagories")
+  superCategory   NewsCategory?  @relation(name: "SubCatagories", fields: [superCategoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  superCategoryId String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  createdBy       String
+  stories         Story[]
+}
+
+model PinNewsArticle {
+  id            Int         @id @default(autoincrement())
+  newsArticleId String      @unique
+  newsArticle   NewsArticle @relation(fields: [newsArticleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  order         Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model VideoArticle {
+  id          String                @id @default(uuid())
+  author      String
+  title       String
+  shortVideo  Boolean?              @default(false)
+  videoURL    String?
+  mediaURL    String?
+  summary     String?
+  category    VideoCategory?        @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  tags        Json?
+  publishedAt DateTime?
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  published   Boolean               @default(false)
+  comments    VideoArticleComment[]
+}
+
+model VideoArticleComment {
+  id              String       @id @default(uuid())
+  videoArticle    VideoArticle @relation(fields: [videoArticleId], references: [id])
+  videoArticleId  String
+  userDisplayName String
+  userId          String
+  body            String
+  createdAt       DateTime     @default(now())
+}
+
+model VideoCategory {
+  id           String         @id @unique @default(uuid())
+  categoryName String         @unique
+  articles     VideoArticle[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  createdBy    String
+}
+
+model Gallery {
+  id        String   @id @default(uuid())
+  title     String
+  summary   String
+  tags      Json?
+  mediaURL  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+}
+
+model Story {
+  id           String        @id @default(uuid())
+  category     NewsCategory? @relation(fields: [categoryId], references: [id])
+  categoryId   String?
+  title        String
+  thumbnailURL String
+  mediaURL     String?
+  tags         Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  createdBy    String
+}
+
+model Section {
+  id        String   @id @default(uuid())
+  name      String
+  labels    Label[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+}
+
+model Label {
+  id        String   @id @default(uuid())
+  name      String
+  section   Section? @relation(fields: [sectionId], references: [id])
+  sectionId String?
+  ads       Ad[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+}
+
+model Ad {
+  id          String   @id @default(uuid())
+  title       String
+  label       Label    @relation(fields: [labelId], references: [id])
+  labelId     String
+  active      Boolean  @default(false)
+  mediaURL    String?
+  redirectURL String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdBy   String
+  impressions Int      @default(0)
+  clickCount  Int      @default(0)
+}
+
+model Thread {
+  id            String        @id @default(uuid())
+  headerTitle   String
+  innerTitle    String
+  navBar        Boolean       @default(false)
+  summary       String
+  coverPhotoURL String?
+  active        Boolean       @default(false)
+  articles      NewsArticle[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  createdBy     String
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  userName  String
+  userRole  String
+  modelName LogModel
+  itemId    String
+  method    String
+  action    String
+  datetime  DateTime @default(now())
+}
+
+enum LogModel {
+  Thread
+  Ad
+  Story
+  Gallery
+  NewsArticle
+  NewsArticleComment
+  NewsCategory
+  VideoArticle
+  VideoArticleComment
+  VideoCategory
+  User
+  Cartoon
+  TopPicture
+  Horoscope
+}
+
+model Cartoon {
+  id        String   @id @default(uuid())
+  title     String
+  imageURL  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+}
+
+model Horoscope {
+  id                         String   @id @default(uuid())
+  title                      String?
+  dayName                    String
+  dateTime                   DateTime
+  auspiciousFromTime         DateTime
+  auspiciousToTime           DateTime
+  ourContinentFromTime       DateTime
+  ourContinentToTime         DateTime
+  rahuFromTime               DateTime
+  rahuToTime                 DateTime
+  mainPhotoURL               String?
+  subaTimeBackgroundPhotoURL String?
+  summary                    String?
+  content                    String?
+  author                     String
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+}
+
+model ArchiveNewsArticle {
+  id        Int       @id
+  title     String?
+  summary   String?
+  content   String?
+  imageURL  String?
+  videoURL  String?
+  updatedAt DateTime?
+}
+
+model Editors {
+  id          String        @id @unique @default(uuid())
+  firstName   String
+  lastName    String
+  email       String        @unique
+  newsCount   Int?
+  NewsArticle NewsArticle[]
+}
