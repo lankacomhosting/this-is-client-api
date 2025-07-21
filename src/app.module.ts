@@ -1,3 +1,4 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { PassportModule } from '@nestjs/passport';
@@ -13,9 +14,15 @@ import { NewsArticleModule } from './news-article/news-article.module';
 import { ResponseInterceptor } from './response.interceptor';
 import { ThreadModule } from './thread/thread.module';
 import { VideoArticleModule } from './video-article/video-article.module';
+import { ConfigModule } from '@nestjs/config'; // <--- ADD THIS IMPORT
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ // <--- ADD THIS CONFIGURATION
+      isGlobal: true,
+      // If your .env file is not in the root, you can specify its path:
+      // envFilePath: '.env',
+    }),
     PassportModule.register({
       defaultStrategy: 'jwt',
       property: 'user',
