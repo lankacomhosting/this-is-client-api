@@ -51,7 +51,8 @@ cd /home/derana/tamil-client/
 
 echo 'prisma installing'  >> /home/derana/tamil-client/deploy.log
 yarn add prisma
-
+pnpm install
+npx prisma generate
 echo 'pm2 start' >> /home/derana/tamil-client/deploy.log
 pm2 start /home/derana/tamil-client/ecosystem.config.js --time >> /home/derana/tamil-client/deploy.log
 
