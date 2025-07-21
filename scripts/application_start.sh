@@ -1,6 +1,6 @@
 #!/bin/bash
 echo 'Setting env variables Started' >> /home/derana/tamil-client/deploy.log
-PREFIX="/derana/adaderana/client/"
+PREFIX="/derana/adaderana/stg/tamil/client/api/"
 
 export AWS_DEFAULT_REGION=us-east-1
 
